@@ -125,13 +125,13 @@ function Analytics() {
             <div></div>
             {Array.from({length:10}).map((_,i)=><div key={i} className="text-[10px] text-center text-muted-foreground">Ch {i+1}</div>)}
             {["Rahim Ahmed","Nusrat Jahan","Tanvir Hasan","Sadia Islam","Farhan Ahmed","Mim Akter","Arif Hossain","Tasnim R."].map((s, si) => (
-              <>
-                <div key={s} className="text-xs font-medium truncate">{s}</div>
+              <React.Fragment key={s}>
+                <div className="text-xs font-medium truncate">{s}</div>
                 {Array.from({length:10}).map((_,i)=>{
                   const v = (Math.sin(si*7+i*3) + 1)/2;
                   return <div key={i} className="aspect-square rounded" style={{ background: `oklch(0.58 0.22 295 / ${0.08 + v * 0.85})` }} title={`${Math.round(v*100)}%`} />;
                 })}
-              </>
+              </React.Fragment>
             ))}
           </div>
         </div>
