@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as StudentRouteImport } from './routes/student'
 import { Route as RubricRouteImport } from './routes/rubric'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -23,6 +24,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
   path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentRoute = StudentRouteImport.update({
+  id: '/student',
+  path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RubricRoute = RubricRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
+  '/student': typeof StudentRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
+  '/student': typeof StudentRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
+  '/student': typeof StudentRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/review'
     | '/rubric'
+    | '/student'
     | '/upload'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/review'
     | '/rubric'
+    | '/student'
     | '/upload'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/review'
     | '/rubric'
+    | '/student'
     | '/upload'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ReviewRoute: typeof ReviewRoute
   RubricRoute: typeof RubricRoute
+  StudentRoute: typeof StudentRoute
   UploadRoute: typeof UploadRoute
 }
 
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/upload'
       fullPath: '/upload'
       preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student': {
+      id: '/student'
+      path: '/student'
+      fullPath: '/student'
+      preLoaderRoute: typeof StudentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rubric': {
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ReviewRoute: ReviewRoute,
   RubricRoute: RubricRoute,
+  StudentRoute: StudentRoute,
   UploadRoute: UploadRoute,
 }
 export const routeTree = rootRouteImport
