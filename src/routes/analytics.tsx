@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import React from "react";
 import { AppShell } from "@/components/app/shell";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, RadialBarChart, RadialBar, XAxis, YAxis, Tooltip, CartesianGrid, PolarAngleAxis } from "recharts";
 import { WEAK_TOPICS, IMPROVEMENT, WEEKLY_ACTIVITY } from "@/lib/mock-data";
