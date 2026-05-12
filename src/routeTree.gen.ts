@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as RubricRouteImport } from './routes/rubric'
+import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GradingRouteImport } from './routes/grading'
@@ -26,6 +27,11 @@ const UploadRoute = UploadRouteImport.update({
 const RubricRoute = RubricRouteImport.update({
   id: '/rubric',
   path: '/rubric',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
   '/upload': typeof UploadRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
   '/upload': typeof UploadRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
   '/upload': typeof UploadRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/grading'
     | '/login'
     | '/register'
+    | '/review'
     | '/rubric'
     | '/upload'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/grading'
     | '/login'
     | '/register'
+    | '/review'
     | '/rubric'
     | '/upload'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/grading'
     | '/login'
     | '/register'
+    | '/review'
     | '/rubric'
     | '/upload'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   GradingRoute: typeof GradingRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ReviewRoute: typeof ReviewRoute
   RubricRoute: typeof RubricRoute
   UploadRoute: typeof UploadRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/rubric'
       fullPath: '/rubric'
       preLoaderRoute: typeof RubricRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   GradingRoute: GradingRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ReviewRoute: ReviewRoute,
   RubricRoute: RubricRoute,
   UploadRoute: UploadRoute,
 }
