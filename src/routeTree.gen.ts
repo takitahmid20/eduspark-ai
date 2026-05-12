@@ -15,6 +15,7 @@ import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GradingRouteImport } from './routes/grading'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AssignmentsRouteImport } from './routes/assignments'
 import { Route as IndexRouteImport } from './routes/index'
@@ -49,6 +50,11 @@ const GradingRoute = GradingRouteImport.update({
   path: '/grading',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assignments': typeof AssignmentsRoute
   '/dashboard': typeof DashboardRoute
+  '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assignments': typeof AssignmentsRoute
   '/dashboard': typeof DashboardRoute
+  '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assignments': typeof AssignmentsRoute
   '/dashboard': typeof DashboardRoute
+  '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assignments'
     | '/dashboard'
+    | '/feedback'
     | '/grading'
     | '/login'
     | '/register'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assignments'
     | '/dashboard'
+    | '/feedback'
     | '/grading'
     | '/login'
     | '/register'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assignments'
     | '/dashboard'
+    | '/feedback'
     | '/grading'
     | '/login'
     | '/register'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssignmentsRoute: typeof AssignmentsRoute
   DashboardRoute: typeof DashboardRoute
+  FeedbackRoute: typeof FeedbackRoute
   GradingRoute: typeof GradingRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GradingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssignmentsRoute: AssignmentsRoute,
   DashboardRoute: DashboardRoute,
+  FeedbackRoute: FeedbackRoute,
   GradingRoute: GradingRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
