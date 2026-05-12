@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as StudentRouteImport } from './routes/student'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RubricRouteImport } from './routes/rubric'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GradingRouteImport } from './routes/grading'
 import { Route as FeedbackRouteImport } from './routes/feedback'
@@ -32,6 +34,11 @@ const StudentRoute = StudentRouteImport.update({
   path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RubricRoute = RubricRouteImport.update({
   id: '/rubric',
   path: '/rubric',
@@ -45,6 +52,11 @@ const ReviewRoute = ReviewRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -91,9 +103,11 @@ export interface FileRoutesByFullPath {
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
+  '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
   '/upload': typeof UploadRoute
 }
@@ -105,9 +119,11 @@ export interface FileRoutesByTo {
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
+  '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
   '/upload': typeof UploadRoute
 }
@@ -120,9 +136,11 @@ export interface FileRoutesById {
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
+  '/settings': typeof SettingsRoute
   '/student': typeof StudentRoute
   '/upload': typeof UploadRoute
 }
@@ -136,9 +154,11 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/grading'
     | '/login'
+    | '/notifications'
     | '/register'
     | '/review'
     | '/rubric'
+    | '/settings'
     | '/student'
     | '/upload'
   fileRoutesByTo: FileRoutesByTo
@@ -150,9 +170,11 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/grading'
     | '/login'
+    | '/notifications'
     | '/register'
     | '/review'
     | '/rubric'
+    | '/settings'
     | '/student'
     | '/upload'
   id:
@@ -164,9 +186,11 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/grading'
     | '/login'
+    | '/notifications'
     | '/register'
     | '/review'
     | '/rubric'
+    | '/settings'
     | '/student'
     | '/upload'
   fileRoutesById: FileRoutesById
@@ -179,9 +203,11 @@ export interface RootRouteChildren {
   FeedbackRoute: typeof FeedbackRoute
   GradingRoute: typeof GradingRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   RegisterRoute: typeof RegisterRoute
   ReviewRoute: typeof ReviewRoute
   RubricRoute: typeof RubricRoute
+  SettingsRoute: typeof SettingsRoute
   StudentRoute: typeof StudentRoute
   UploadRoute: typeof UploadRoute
 }
@@ -200,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/student'
       fullPath: '/student'
       preLoaderRoute: typeof StudentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rubric': {
@@ -221,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -283,9 +323,11 @@ const rootRouteChildren: RootRouteChildren = {
   FeedbackRoute: FeedbackRoute,
   GradingRoute: GradingRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   RegisterRoute: RegisterRoute,
   ReviewRoute: ReviewRoute,
   RubricRoute: RubricRoute,
+  SettingsRoute: SettingsRoute,
   StudentRoute: StudentRoute,
   UploadRoute: UploadRoute,
 }
