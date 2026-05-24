@@ -1,148 +1,207 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { AppShell } from "@/components/app/shell";
-import { ASSIGNMENTS, SUBMISSIONS, WEEKLY_ACTIVITY, WEAK_TOPICS, IMPROVEMENT } from "@/lib/mock-data";
-import { Plus, Upload, Sparkles, Download, TrendingUp, AlertTriangle, FileCheck2, Brain, ArrowUpRight } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import {
+  Users, ClipboardList, Plus, ArrowRight, Loader2, BookOpen, Hash,
+} from "lucide-react";
+import { getStudents, getAssignment } from "@/lib/api";
+import { getProfile } from "@/lib/api";
+import type { UserProfile, Assignment } from "@/lib/api";
+import { DashboardSkeleton } from "@/components/app/skeleton";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Grading.AI" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — TAAI" }] }),
   component: Dashboard,
 });
 
+const STORAGE_KEY = "taai_assignment_ids";
+function getStoredIds(): number[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
 function Dashboard() {
-  const stats = [
-    { label: "Total Submissions", value: "248", trend: "+12%", icon: FileCheck2, color: "primary" },
-    { label: "AI Graded Today", value: "67", trend: "+24%", icon: Sparkles, color: "secondary" },
-    { label: "Avg Class Score", value: "82%", trend: "+3.2%", icon: TrendingUp, color: "success" },
-    { label: "Pending Review", value: "12", trend: "-5", icon: AlertTriangle, color: "warning" },
-    { label: "Avg Confidence", value: "91%", trend: "+1.4%", icon: Brain, color: "primary" },
-  ];
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [studentCount, setStudentCount] = useState<number>(0);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const profileRes = await getProfile();
+      if (profileRes.data) setProfile(profileRes.data);
+
+      const studentsRes = await getStudents();
+      if (studentsRes.data) setStudentCount(studentsRes.data.count);
+
+      const ids = getStoredIds();
+      if (ids.length > 0) {
+        const results = await Promise.all(ids.slice(0, 8).map((id) => getAssignment(id)));
+        const valid: Assignment[] = [];
+        results.forEach((r) => { if (r.data) valid.push(r.data); });
+        setAssignments(valid);
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const displayName = profile?.display_name || profile?.email?.split("@")[0] || "Teacher";
+  const today = new Date();
+  const greeting = today.getHours() < 12 ? "Good morning" : today.getHours() < 18 ? "Good afternoon" : "Good evening";
+  const dateStr = today.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  if (loading) {
+    return (
+      <AppShell title="Dashboard">
+        <DashboardSkeleton />
+      </AppShell>
+    );
+  }
 
   return (
-    <AppShell title="Welcome back, Prof. Mahmud" subtitle="Here's what's happening in your classes today">
-      {/* Quick actions */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Link to="/assignments" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-primary text-primary-foreground text-sm font-medium shadow-elegant hover:shadow-glow transition"><Plus className="size-4" /> Create Assignment</Link>
-        <Link to="/upload" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-sm font-medium hover:bg-accent transition"><Upload className="size-4" /> Upload Submissions</Link>
-        <Link to="/grading" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-sm font-medium hover:bg-accent transition"><Sparkles className="size-4" /> Generate AI Review</Link>
-        <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-sm font-medium hover:bg-accent transition"><Download className="size-4" /> Export Report</button>
-      </div>
+    <AppShell title={`${greeting}, ${displayName}`} subtitle={dateStr}>
+      <div className="w-full space-y-6">
+        {/* Stats row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="TOTAL STUDENTS" value={String(studentCount)} sub={`${studentCount} registered`} />
+          <StatCard label="ASSIGNMENTS" value={String(assignments.length)} sub={`${assignments.length} total`} />
+          <StatCard label="PENDING" value="—" sub="No grading API yet" />
+          <StatCard label="AVG. SCORE" value="—" sub="No grading API yet" />
+        </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        {stats.map((s, i) => (
-          <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="p-5 rounded-2xl bg-card border border-border shadow-card hover:shadow-elegant transition">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`size-9 rounded-lg grid place-items-center ${s.color === 'success' ? 'bg-success/15 text-success' : s.color === 'warning' ? 'bg-warning/15 text-warning' : s.color === 'secondary' ? 'bg-secondary/30 text-secondary-foreground' : 'bg-primary/15 text-primary'}`}>
-                <s.icon className="size-4" />
+        {/* Quick action */}
+        <div className="flex items-center gap-3">
+          <Link
+            to="/assignments"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium cursor-pointer"
+          >
+            <Plus className="size-4" /> New Assignment
+          </Link>
+          <Link
+            to="/student"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-accent transition cursor-pointer"
+          >
+            <Users className="size-4" /> Manage Students
+          </Link>
+        </div>
+
+        {/* Main content grid */}
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+          {/* Assignments list */}
+          <div className="rounded-lg border border-border bg-card">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="font-bold text-sm">Assignments</h2>
+              <Link to="/assignments" className="text-xs text-primary font-medium hover:underline cursor-pointer flex items-center gap-1">
+                Manage all <ArrowRight className="size-3" />
+              </Link>
+            </div>
+
+            {assignments.length === 0 ? (
+              <div className="px-5 py-12 text-center">
+                <ClipboardList className="size-10 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No assignments yet.</p>
+                <Link to="/assignments" className="mt-3 inline-flex items-center gap-2 text-xs text-primary font-medium cursor-pointer">
+                  <Plus className="size-3" /> Create your first
+                </Link>
               </div>
-              <span className={`text-xs font-medium ${s.trend.startsWith('-') && s.label !== 'Pending Review' ? 'text-destructive' : 'text-success'}`}>{s.trend}</span>
-            </div>
-            <div className="text-2xl font-bold">{s.value}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-4 mb-6">
-        <div className="lg:col-span-2 p-5 rounded-2xl bg-card border border-border shadow-card">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-bold">Weekly Grading Activity</h3>
-              <p className="text-xs text-muted-foreground">AI-graded vs manually reviewed</p>
-            </div>
-            <div className="flex gap-3 text-xs">
-              <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-primary" /> AI</span>
-              <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-secondary" /> Manual</span>
-            </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {assignments.map((a) => {
+                  const id = a.assignment_id || a.id || 0;
+                  return (
+                    <Link
+                      key={id}
+                      to="/assignments/$assignmentId"
+                      params={{ assignmentId: String(id) }}
+                      className="flex items-center gap-4 px-5 py-3.5 hover:bg-accent/50 transition cursor-pointer"
+                    >
+                      <div className="size-9 rounded-lg bg-primary/10 text-primary grid place-items-center text-xs font-bold shrink-0">
+                        {a.subject.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{a.title}</div>
+                        <div className="text-xs text-muted-foreground">{a.subject}{a.topic ? ` · ${a.topic}` : ""}</div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Hash className="size-3" /> {a.total_marks} pts
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={WEEKLY_ACTIVITY}>
-              <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="oklch(0.58 0.22 295)" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="oklch(0.58 0.22 295)" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="oklch(0.86 0.18 120)" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="oklch(0.86 0.18 120)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0.005 270)" vertical={false} />
-              <XAxis dataKey="day" stroke="oklch(0.5 0.02 270)" fontSize={12} axisLine={false} tickLine={false} />
-              <YAxis stroke="oklch(0.5 0.02 270)" fontSize={12} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} />
-              <Area type="monotone" dataKey="graded" stroke="oklch(0.58 0.22 295)" strokeWidth={2} fill="url(#g1)" />
-              <Area type="monotone" dataKey="manual" stroke="oklch(0.7 0.18 120)" strokeWidth={2} fill="url(#g2)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
 
-        <div className="p-5 rounded-2xl bg-card border border-border shadow-card">
-          <h3 className="font-bold mb-1">Weak Topics</h3>
-          <p className="text-xs text-muted-foreground mb-4">Avg score per topic</p>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={WEAK_TOPICS} layout="vertical" margin={{ left: 0 }}>
-              <XAxis type="number" hide domain={[0, 100]} />
-              <YAxis type="category" dataKey="topic" stroke="oklch(0.5 0.02 270)" fontSize={11} axisLine={false} tickLine={false} width={120} />
-              <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} />
-              <Bar dataKey="score" fill="oklch(0.58 0.22 295)" radius={[0, 6, 6, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 p-5 rounded-2xl bg-card border border-border shadow-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold">Recent Assignments</h3>
-            <Link to="/assignments" className="text-xs text-primary font-medium hover:underline flex items-center gap-1">View all <ArrowUpRight className="size-3" /></Link>
-          </div>
-          <div className="space-y-3">
-            {ASSIGNMENTS.slice(0, 4).map((a) => (
-              <Link key={a.id} to="/review" className="flex items-center gap-4 p-3 rounded-xl border border-border hover:bg-accent transition">
-                <div className="size-10 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground text-xs font-bold">{a.subject.slice(0, 2).toUpperCase()}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm truncate">{a.title}</div>
-                  <div className="text-xs text-muted-foreground">{a.subject} · {a.submissions}/{a.total} submitted</div>
+          {/* Right sidebar */}
+          <div className="space-y-4">
+            {/* Quick info */}
+            <div className="rounded-lg border border-border bg-card p-5">
+              <h3 className="font-bold text-sm mb-3">Quick Info</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="font-medium text-xs truncate max-w-[160px]">{profile?.email}</span>
                 </div>
-                <div className="hidden sm:flex flex-col items-end gap-1">
-                  <div className="text-xs text-muted-foreground">AI Progress</div>
-                  <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden"><div className="h-full bg-gradient-primary" style={{ width: `${a.aiProgress}%` }} /></div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Students</span>
+                  <span className="font-medium">{studentCount}</span>
                 </div>
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${a.status === 'Reviewed' ? 'bg-success/15 text-success' : a.status === 'Grading' ? 'bg-primary/15 text-primary' : 'bg-warning/15 text-warning'}`}>{a.status}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Assignments</span>
+                  <span className="font-medium">{assignments.length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Member since</span>
+                  <span className="font-medium text-xs">
+                    {profile?.created_at
+                      ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                      : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-        <div className="p-5 rounded-2xl bg-card border border-border shadow-card">
-          <h3 className="font-bold mb-1">Improvement Trend</h3>
-          <p className="text-xs text-muted-foreground mb-4">Class average · 7 weeks</p>
-          <ResponsiveContainer width="100%" height={140}>
-            <LineChart data={IMPROVEMENT}>
-              <XAxis dataKey="week" stroke="oklch(0.5 0.02 270)" fontSize={11} axisLine={false} tickLine={false} />
-              <YAxis hide domain={[50, 100]} />
-              <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} />
-              <Line type="monotone" dataKey="avg" stroke="oklch(0.58 0.22 295)" strokeWidth={3} dot={{ fill: "oklch(0.58 0.22 295)", r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="mt-4 p-3 rounded-xl bg-gradient-to-br from-secondary/20 to-transparent border border-border">
-            <div className="text-xs text-muted-foreground">AI Insight</div>
-            <div className="text-sm font-semibold mt-1">Class avg up 19 points since W1 — keep emphasizing problem-based learning.</div>
-          </div>
-          <div className="mt-3">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Pending Reviews</h4>
-            {SUBMISSIONS.filter(s => s.status === "Review").slice(0,3).map((s) => (
-              <Link to="/review" key={s.id} className="flex items-center gap-2 py-2 text-sm hover:text-primary transition">
-                <div className="size-7 rounded-full bg-accent grid place-items-center text-xs font-semibold">{s.student.split(" ").map(n=>n[0]).join("")}</div>
-                <span className="flex-1 truncate">{s.student}</span>
-                <span className="text-xs text-warning">{s.confidence}%</span>
-              </Link>
-            ))}
+            {/* Recent students */}
+            <div className="rounded-lg border border-border bg-card">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 className="font-bold text-sm">Students</h3>
+                <Link to="/student" className="text-xs text-primary font-medium hover:underline cursor-pointer">
+                  View all
+                </Link>
+              </div>
+              <div className="px-5 py-4">
+                {studentCount === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">No students added yet.</p>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <Users className="size-5 text-muted-foreground" />
+                    <div>
+                      <div className="text-sm font-medium">{studentCount} students</div>
+                      <div className="text-xs text-muted-foreground">registered in your roster</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </AppShell>
+  );
+}
+
+function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="p-5 rounded-lg border border-border bg-card">
+      <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">{label}</div>
+      <div className="text-3xl font-bold leading-none">{value}</div>
+      <div className="text-xs text-muted-foreground mt-1.5">{sub}</div>
+    </div>
   );
 }

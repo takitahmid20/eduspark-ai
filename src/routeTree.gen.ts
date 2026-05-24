@@ -23,6 +23,10 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AssignmentsRouteImport } from './routes/assignments'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StudentIndexRouteImport } from './routes/student.index'
+import { Route as AssignmentsIndexRouteImport } from './routes/assignments.index'
+import { Route as StudentStudentIdRouteImport } from './routes/student.$studentId'
+import { Route as AssignmentsAssignmentIdRouteImport } from './routes/assignments.$assignmentId'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -94,11 +98,31 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentIndexRoute = StudentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StudentRoute,
+} as any)
+const AssignmentsIndexRoute = AssignmentsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AssignmentsRoute,
+} as any)
+const StudentStudentIdRoute = StudentStudentIdRouteImport.update({
+  id: '/$studentId',
+  path: '/$studentId',
+  getParentRoute: () => StudentRoute,
+} as any)
+const AssignmentsAssignmentIdRoute = AssignmentsAssignmentIdRouteImport.update({
+  id: '/$assignmentId',
+  path: '/$assignmentId',
+  getParentRoute: () => AssignmentsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
-  '/assignments': typeof AssignmentsRoute
+  '/assignments': typeof AssignmentsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
@@ -108,13 +132,16 @@ export interface FileRoutesByFullPath {
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
+  '/student': typeof StudentRouteWithChildren
   '/upload': typeof UploadRoute
+  '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
+  '/student/$studentId': typeof StudentStudentIdRoute
+  '/assignments/': typeof AssignmentsIndexRoute
+  '/student/': typeof StudentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
-  '/assignments': typeof AssignmentsRoute
   '/dashboard': typeof DashboardRoute
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
@@ -124,14 +151,17 @@ export interface FileRoutesByTo {
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
   '/upload': typeof UploadRoute
+  '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
+  '/student/$studentId': typeof StudentStudentIdRoute
+  '/assignments': typeof AssignmentsIndexRoute
+  '/student': typeof StudentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
-  '/assignments': typeof AssignmentsRoute
+  '/assignments': typeof AssignmentsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
@@ -141,8 +171,12 @@ export interface FileRoutesById {
   '/review': typeof ReviewRoute
   '/rubric': typeof RubricRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
+  '/student': typeof StudentRouteWithChildren
   '/upload': typeof UploadRoute
+  '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
+  '/student/$studentId': typeof StudentStudentIdRoute
+  '/assignments/': typeof AssignmentsIndexRoute
+  '/student/': typeof StudentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,11 +195,14 @@ export interface FileRouteTypes {
     | '/settings'
     | '/student'
     | '/upload'
+    | '/assignments/$assignmentId'
+    | '/student/$studentId'
+    | '/assignments/'
+    | '/student/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analytics'
-    | '/assignments'
     | '/dashboard'
     | '/feedback'
     | '/grading'
@@ -175,8 +212,11 @@ export interface FileRouteTypes {
     | '/review'
     | '/rubric'
     | '/settings'
-    | '/student'
     | '/upload'
+    | '/assignments/$assignmentId'
+    | '/student/$studentId'
+    | '/assignments'
+    | '/student'
   id:
     | '__root__'
     | '/'
@@ -193,12 +233,16 @@ export interface FileRouteTypes {
     | '/settings'
     | '/student'
     | '/upload'
+    | '/assignments/$assignmentId'
+    | '/student/$studentId'
+    | '/assignments/'
+    | '/student/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
-  AssignmentsRoute: typeof AssignmentsRoute
+  AssignmentsRoute: typeof AssignmentsRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   FeedbackRoute: typeof FeedbackRoute
   GradingRoute: typeof GradingRoute
@@ -208,7 +252,7 @@ export interface RootRouteChildren {
   ReviewRoute: typeof ReviewRoute
   RubricRoute: typeof RubricRoute
   SettingsRoute: typeof SettingsRoute
-  StudentRoute: typeof StudentRoute
+  StudentRoute: typeof StudentRouteWithChildren
   UploadRoute: typeof UploadRoute
 }
 
@@ -312,13 +356,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/': {
+      id: '/student/'
+      path: '/'
+      fullPath: '/student/'
+      preLoaderRoute: typeof StudentIndexRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/assignments/': {
+      id: '/assignments/'
+      path: '/'
+      fullPath: '/assignments/'
+      preLoaderRoute: typeof AssignmentsIndexRouteImport
+      parentRoute: typeof AssignmentsRoute
+    }
+    '/student/$studentId': {
+      id: '/student/$studentId'
+      path: '/$studentId'
+      fullPath: '/student/$studentId'
+      preLoaderRoute: typeof StudentStudentIdRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/assignments/$assignmentId': {
+      id: '/assignments/$assignmentId'
+      path: '/$assignmentId'
+      fullPath: '/assignments/$assignmentId'
+      preLoaderRoute: typeof AssignmentsAssignmentIdRouteImport
+      parentRoute: typeof AssignmentsRoute
+    }
   }
 }
+
+interface AssignmentsRouteChildren {
+  AssignmentsAssignmentIdRoute: typeof AssignmentsAssignmentIdRoute
+  AssignmentsIndexRoute: typeof AssignmentsIndexRoute
+}
+
+const AssignmentsRouteChildren: AssignmentsRouteChildren = {
+  AssignmentsAssignmentIdRoute: AssignmentsAssignmentIdRoute,
+  AssignmentsIndexRoute: AssignmentsIndexRoute,
+}
+
+const AssignmentsRouteWithChildren = AssignmentsRoute._addFileChildren(
+  AssignmentsRouteChildren,
+)
+
+interface StudentRouteChildren {
+  StudentStudentIdRoute: typeof StudentStudentIdRoute
+  StudentIndexRoute: typeof StudentIndexRoute
+}
+
+const StudentRouteChildren: StudentRouteChildren = {
+  StudentStudentIdRoute: StudentStudentIdRoute,
+  StudentIndexRoute: StudentIndexRoute,
+}
+
+const StudentRouteWithChildren =
+  StudentRoute._addFileChildren(StudentRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
-  AssignmentsRoute: AssignmentsRoute,
+  AssignmentsRoute: AssignmentsRouteWithChildren,
   DashboardRoute: DashboardRoute,
   FeedbackRoute: FeedbackRoute,
   GradingRoute: GradingRoute,
@@ -328,9 +427,19 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewRoute: ReviewRoute,
   RubricRoute: RubricRoute,
   SettingsRoute: SettingsRoute,
-  StudentRoute: StudentRoute,
+  StudentRoute: StudentRouteWithChildren,
   UploadRoute: UploadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
