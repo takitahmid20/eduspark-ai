@@ -4,18 +4,19 @@ import { ENDPOINTS } from "./config";
 // Types
 export type Student = {
   teacher_id: string;
-  id: string;
+  student_id: string;
   name: string;
   created_at: string;
 };
 
 export type CreateStudentPayload = {
-  id: string;
+  student_id: string;
   name: string;
 };
 
 export type UpdateStudentPayload = {
-  name: string;
+  student_id?: string;
+  name?: string;
 };
 
 type StudentsListResponse = {

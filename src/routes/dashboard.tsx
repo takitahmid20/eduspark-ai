@@ -4,7 +4,7 @@ import { AppShell } from "@/components/app/shell";
 import {
   Users, ClipboardList, Plus, ArrowRight, Loader2, BookOpen, Hash,
 } from "lucide-react";
-import { getStudents, getAssignment } from "@/lib/api";
+import { getStudents, getAssignments } from "@/lib/api";
 import { getProfile } from "@/lib/api";
 import type { UserProfile, Assignment } from "@/lib/api";
 import { DashboardSkeleton } from "@/components/app/skeleton";
@@ -13,14 +13,6 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — TAAI" }] }),
   component: Dashboard,
 });
-
-const STORAGE_KEY = "taai_assignment_ids";
-function getStoredIds(): number[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
 
 function Dashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -37,13 +29,9 @@ function Dashboard() {
       const studentsRes = await getStudents();
       if (studentsRes.data) setStudentCount(studentsRes.data.count);
 
-      const ids = getStoredIds();
-      if (ids.length > 0) {
-        const results = await Promise.all(ids.slice(0, 8).map((id) => getAssignment(id)));
-        const valid: Assignment[] = [];
-        results.forEach((r) => { if (r.data) valid.push(r.data); });
-        setAssignments(valid);
-      }
+      const assignmentsRes = await getAssignments();
+      if (assignmentsRes.data) setAssignments(assignmentsRes.data.data);
+
       setLoading(false);
     }
     load();

@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, ClipboardList, GraduationCap, Settings, LogOut, PanelLeftClose, PanelLeft,
+  LayoutDashboard, ClipboardList, GraduationCap, Settings, LogOut, PanelLeftClose, PanelLeft, Sparkles,
 } from "lucide-react";
 import { Logo } from "./logo";
 import { clearToken } from "@/lib/auth";
@@ -23,6 +23,8 @@ export function AppSidebar() {
     clearToken();
     navigate({ to: "/login" });
   }
+
+  const chatActive = path === "/chat";
 
   return (
     <aside
@@ -68,8 +70,37 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Bottom */}
-      <div className={cn("pb-4 pt-3 border-t border-sidebar-border", collapsed ? "px-1.5" : "px-2")}>
+      {/* TAAI Chat — prominent CTA with animated border */}
+      <div className={cn("border-t border-sidebar-border", collapsed ? "px-1.5 py-3" : "px-3 py-3")}>
+        <Link
+          to="/chat"
+          title={collapsed ? "TAAI Chat" : undefined}
+          className={cn(
+            "relative flex items-center rounded-md transition-all cursor-pointer overflow-hidden",
+            collapsed ? "justify-center py-2.5" : "gap-3 px-4 py-3",
+            chatActive
+              ? "bg-primary text-primary-foreground"
+              : "bg-primary/10 text-primary hover:bg-primary/20"
+          )}
+        >
+          {/* Animated gradient border */}
+          <span className="absolute inset-0 rounded-md p-[1.5px] pointer-events-none">
+            <span className="absolute inset-0 rounded-md animate-border-spin" style={{ background: "conic-gradient(from var(--border-angle, 0deg), var(--primary), var(--secondary), var(--primary-glow), var(--primary))" }} />
+          </span>
+          <span className={cn("absolute inset-[1.5px] rounded-[calc(0.375rem-1.5px)]", chatActive ? "bg-primary" : "bg-sidebar")} />
+
+          <Sparkles className="size-4 shrink-0 relative z-10" />
+          {!collapsed && (
+            <div className="flex-1 min-w-0 relative z-10">
+              <div className="text-sm font-semibold">TAAI Chat</div>
+              <div className={cn("text-[10px]", chatActive ? "text-primary-foreground/70" : "text-primary/60")}>Ask anything</div>
+            </div>
+          )}
+        </Link>
+      </div>
+
+      {/* Sign out */}
+      <div className={cn("pb-4 pt-2", collapsed ? "px-1.5" : "px-2")}>
         <button
           onClick={handleLogout}
           title={collapsed ? "Sign out" : undefined}

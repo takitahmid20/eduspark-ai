@@ -5,7 +5,8 @@
  * - Production: Set in .env.production
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://5zcs6sz7-8080.asse.devtunnels.ms";
+// export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://5zcs6sz7-8080.asse.devtunnels.ms";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://jdw0nbdh-8080.inc1.devtunnels.ms";
 
 export const ENDPOINTS = {
   // Auth
@@ -27,14 +28,37 @@ export const ENDPOINTS = {
   QUESTIONS_UPLOAD: (assignmentId: number) => `/assignments/${assignmentId}/questions/upload`,
   QUESTIONS: (assignmentId: number) => `/assignments/${assignmentId}/questions`,
   QUESTION_UPDATE: (questionId: number) => `/assignments/${questionId}/questions`,
+  QUESTION_DELETE: (questionId: number) => `/assignments/${questionId}/questions`,
 
   // Rubrics
   RUBRICS_UPLOAD: (assignmentId: number) => `/assignments/${assignmentId}/rubrics/upload`,
   RUBRICS: (assignmentId: number) => `/assignments/${assignmentId}/rubrics`,
   RUBRIC_UPDATE: (rubricId: number) => `/assignments/${rubricId}/rubrics`,
+  RUBRIC_DELETE: (assignmentId: number, rubricId: number) => `/assignments/${assignmentId}/rubrics/${rubricId}`,
 
   // Teacher Solutions
   SOLUTIONS_UPLOAD: (assignmentId: number) => `/assignments/${assignmentId}/solutions/upload`,
   SOLUTIONS: (assignmentId: number) => `/assignments/${assignmentId}/solutions`,
   SOLUTION_UPDATE: (solutionId: number) => `/assignments/${solutionId}/solutions`,
+  SOLUTION_DELETE: (assignmentId: number, solutionId: number) => `/assignments/${assignmentId}/solutions/${solutionId}`,
+
+  // Student Answers
+  STUDENT_ANSWERS_UPLOAD: (assignmentId: number, studentId: string) =>
+    `/assignments/${assignmentId}/students/${studentId}/answers/upload`,
+  STUDENT_ANSWERS: (assignmentId: number, studentId: string) =>
+    `/assignments/${assignmentId}/students/${studentId}/answers`,
+  STUDENT_ANSWER_UPDATE: (answerId: number) => `/student-answers/${answerId}`,
+
+  // Grading
+  GRADE_STUDENT: (assignmentId: number, studentId: string) =>
+    `/assignments/${assignmentId}/students/${studentId}/grade`,
+  STUDENT_SCORES: (assignmentId: number, studentId: string) =>
+    `/assignments/${assignmentId}/students/${studentId}/scores`,
+
+  // Syllabus GraphRAG
+  SYLLABUS_UPLOAD: "/syllabus/upload",
+  SYLLABUS_GRAPH: (syllabusId: number) => `/syllabus/${syllabusId}/graph`,
+  SYLLABUS_QUERY: "/syllabus/query",
+  SYLLABUS_PREREQUISITES: (syllabusId: number, topic: string) =>
+    `/syllabus/${syllabusId}/prerequisites/${encodeURIComponent(topic)}`,
 } as const;

@@ -8,11 +8,13 @@ export function getToken(): string | null {
 
 /** Store access token */
 export function setToken(token: string): void {
+  if (typeof window === "undefined") return;
   localStorage.setItem(TOKEN_KEY, token);
 }
 
 /** Remove access token (logout) */
 export function clearToken(): void {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
 }
 

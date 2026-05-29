@@ -85,7 +85,7 @@ function StudentDetail() {
               </div>
               <div>
                 <h2 className="text-2xl font-display font-bold">{student.name}</h2>
-                <p className="text-sm text-muted-foreground mt-0.5">Student ID: {student.id}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Student ID: {student.student_id}</p>
               </div>
             </div>
 
@@ -95,7 +95,7 @@ function StudentDetail() {
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
                   <Hash className="size-3.5" /> Student ID
                 </div>
-                <div className="text-base font-mono font-semibold">{student.id}</div>
+                <div className="text-base font-mono font-semibold">{student.student_id}</div>
               </div>
 
               <div className="p-4 rounded-md bg-muted/50 border border-border">

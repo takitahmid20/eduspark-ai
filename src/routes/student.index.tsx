@@ -38,6 +38,7 @@ function StudentsPage() {
   // Edit student state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editStudentId, setEditStudentId] = useState("");
   const [editLoading, setEditLoading] = useState(false);
 
   // Delete state
@@ -78,7 +79,7 @@ function StudentsPage() {
 
     setAddLoading(true);
     const result = await createStudent({
-      id: addForm.id.trim(),
+      student_id: addForm.id.trim(),
       name: addForm.name.trim(),
     });
     setAddLoading(false);
@@ -99,14 +100,18 @@ function StudentsPage() {
 
   // Edit student
   function startEdit(student: Student) {
-    setEditingId(student.id);
+    setEditingId(student.student_id);
     setEditName(student.name);
+    setEditStudentId(student.student_id);
   }
 
   async function handleEdit(studentId: string) {
-    if (!editName.trim()) return;
+    if (!editName.trim() || !editStudentId.trim()) return;
     setEditLoading(true);
-    const result = await updateStudent(studentId, { name: editName.trim() });
+    const result = await updateStudent(studentId, {
+      name: editName.trim(),
+      student_id: editStudentId.trim(),
+    });
     setEditLoading(false);
 
     if (result.error) {
@@ -273,33 +278,44 @@ function StudentsPage() {
         ) : (
           <div className="space-y-2">
             <div className="px-4 py-2 text-xs font-medium text-muted-foreground grid grid-cols-[120px_1fr_140px]">
-              <span>ID</span>
+              <span>Student ID</span>
               <span>Name</span>
               <span className="text-right">Actions</span>
             </div>
 
             {filtered.map((student) => (
               <motion.div
-                key={student.id}
+                key={student.student_id}
                 layout
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="grid grid-cols-[120px_1fr_140px] items-center px-4 py-3 rounded-md border border-border bg-card hover:bg-accent/50 transition"
               >
-                {/* ID */}
-                <span className="text-sm font-mono text-muted-foreground">
-                  {student.id}
-                </span>
+                {/* Student ID (editable) */}
+                <div className="min-w-0">
+                  {editingId === student.student_id ? (
+                    <input
+                      type="text"
+                      value={editStudentId}
+                      onChange={(e) => setEditStudentId(e.target.value)}
+                      className="w-full px-2 py-1 rounded-md border border-ring bg-background text-sm font-mono outline-none"
+                    />
+                  ) : (
+                    <span className="text-sm font-mono text-muted-foreground">
+                      {student.student_id}
+                    </span>
+                  )}
+                </div>
 
                 {/* Name (editable) */}
                 <div className="min-w-0 pr-4">
-                  {editingId === student.id ? (
+                  {editingId === student.student_id ? (
                     <input
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") handleEdit(student.id);
+                        if (e.key === "Enter") handleEdit(student.student_id);
                         if (e.key === "Escape") setEditingId(null);
                       }}
                       autoFocus
@@ -314,10 +330,10 @@ function StudentsPage() {
 
                 {/* Actions */}
                 <div className="flex items-center justify-end gap-1">
-                  {editingId === student.id ? (
+                  {editingId === student.student_id ? (
                     <>
                       <button
-                        onClick={() => handleEdit(student.id)}
+                        onClick={() => handleEdit(student.student_id)}
                         disabled={editLoading}
                         className="size-8 rounded-lg bg-success/10 text-success grid place-items-center hover:bg-success/20 transition cursor-pointer"
                       >
@@ -334,11 +350,11 @@ function StudentsPage() {
                         <X className="size-3.5" />
                       </button>
                     </>
-                  ) : deletingId === student.id ? (
+                  ) : deletingId === student.student_id ? (
                     <>
                       <span className="text-xs text-destructive mr-1">Delete?</span>
                       <button
-                        onClick={() => handleDelete(student.id)}
+                        onClick={() => handleDelete(student.student_id)}
                         disabled={deleteLoading}
                         className="size-8 rounded-lg bg-destructive/10 text-destructive grid place-items-center hover:bg-destructive/20 transition cursor-pointer"
                       >
@@ -359,7 +375,7 @@ function StudentsPage() {
                     <>
                       <Link
                         to="/student/$studentId"
-                        params={{ studentId: student.id }}
+                        params={{ studentId: student.student_id }}
                         className="size-8 rounded-lg hover:bg-primary/10 grid place-items-center transition cursor-pointer"
                         title="Details"
                       >
@@ -373,7 +389,7 @@ function StudentsPage() {
                         <Pencil className="size-3.5 text-muted-foreground" />
                       </button>
                       <button
-                        onClick={() => setDeletingId(student.id)}
+                        onClick={() => setDeletingId(student.student_id)}
                         className="size-8 rounded-lg hover:bg-destructive/10 grid place-items-center transition cursor-pointer"
                         title="Delete"
                       >

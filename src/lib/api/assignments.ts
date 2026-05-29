@@ -31,11 +31,21 @@ type CreateAssignmentResponse = {
   message: string;
 };
 
+type AssignmentsListResponse = {
+  message: string;
+  count: number;
+  data: Assignment[];
+};
+
 type DeleteAssignmentResponse = {
   message: string;
 };
 
 // API calls
+export async function getAssignments() {
+  return apiClient<AssignmentsListResponse>(ENDPOINTS.ASSIGNMENTS);
+}
+
 export async function createAssignment(payload: CreateAssignmentPayload) {
   return apiClient<CreateAssignmentResponse>(ENDPOINTS.ASSIGNMENTS, {
     method: "POST",

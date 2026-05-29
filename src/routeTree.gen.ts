@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as GradingRouteImport } from './routes/grading'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AssignmentsRouteImport } from './routes/assignments'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
@@ -83,6 +84,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssignmentsRoute = AssignmentsRouteImport.update({
   id: '/assignments',
   path: '/assignments',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/assignments': typeof AssignmentsRouteWithChildren
+  '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/assignments': typeof AssignmentsRouteWithChildren
+  '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
   '/feedback': typeof FeedbackRoute
   '/grading': typeof GradingRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/assignments'
+    | '/chat'
     | '/dashboard'
     | '/feedback'
     | '/grading'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analytics'
+    | '/chat'
     | '/dashboard'
     | '/feedback'
     | '/grading'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/assignments'
+    | '/chat'
     | '/dashboard'
     | '/feedback'
     | '/grading'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   AssignmentsRoute: typeof AssignmentsRouteWithChildren
+  ChatRoute: typeof ChatRoute
   DashboardRoute: typeof DashboardRoute
   FeedbackRoute: typeof FeedbackRoute
   GradingRoute: typeof GradingRoute
@@ -335,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assignments': {
       id: '/assignments'
       path: '/assignments'
@@ -418,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   AssignmentsRoute: AssignmentsRouteWithChildren,
+  ChatRoute: ChatRoute,
   DashboardRoute: DashboardRoute,
   FeedbackRoute: FeedbackRoute,
   GradingRoute: GradingRoute,

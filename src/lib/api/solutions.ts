@@ -52,3 +52,10 @@ export async function updateSolution(solutionId: number, payload: UpdateSolution
     body: payload as unknown as Record<string, unknown>,
   });
 }
+
+export async function deleteSolution(assignmentId: number, solutionId: number) {
+  return apiClient<{ message: string; data: { id: number; question_label: string } }>(
+    ENDPOINTS.SOLUTION_DELETE(assignmentId, solutionId),
+    { method: "DELETE" }
+  );
+}

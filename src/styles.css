@@ -199,6 +199,18 @@
 }
 .animate-float { animation: float 6s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes border-spin {
+  to { --border-angle: 360deg; }
+}
+.animate-border-spin {
+  animation: border-spin 3s linear infinite;
+  background: conic-gradient(from var(--border-angle), var(--primary), var(--secondary), var(--primary-glow), var(--primary));
+}
 .shimmer {
   background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--muted) 80%, transparent), transparent);
   background-size: 1000px 100%;

@@ -54,3 +54,9 @@ export async function updateQuestion(questionId: number, payload: UpdateQuestion
     body: payload as unknown as Record<string, unknown>,
   });
 }
+
+export async function deleteQuestion(questionId: number) {
+  return apiClient<{ message: string }>(ENDPOINTS.QUESTION_DELETE(questionId), {
+    method: "DELETE",
+  });
+}

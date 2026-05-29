@@ -58,6 +58,13 @@ export async function uploadRubrics(assignmentId: number, files: File[], isHandw
   });
 }
 
+export async function createRubric(assignmentId: number, payload: { question_label: string; rubric_description: RubricDescription }) {
+  return apiClient<RubricUpdateResponse>(ENDPOINTS.RUBRICS(assignmentId), {
+    method: "POST",
+    body: payload as unknown as Record<string, unknown>,
+  });
+}
+
 export async function getRubrics(assignmentId: number) {
   return apiClient<RubricsListResponse>(ENDPOINTS.RUBRICS(assignmentId));
 }
@@ -67,4 +74,11 @@ export async function updateRubric(rubricId: number, payload: UpdateRubricPayloa
     method: "PATCH",
     body: payload as unknown as Record<string, unknown>,
   });
+}
+
+export async function deleteRubric(assignmentId: number, rubricId: number) {
+  return apiClient<{ message: string; data: { id: number; question_label: string } }>(
+    ENDPOINTS.RUBRIC_DELETE(assignmentId, rubricId),
+    { method: "DELETE" }
+  );
 }

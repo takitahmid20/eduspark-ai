@@ -27,6 +27,11 @@ export async function apiClient<T = unknown>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<ApiResponse<T>> {
+  // Skip API calls during SSR — data fetching happens client-side only
+  if (typeof window === "undefined") {
+    return { data: null, error: null, status: 0 };
+  }
+
   const { method = "GET", body, headers = {}, public: isPublic = false } = options;
 
   const url = `${API_BASE_URL}${endpoint}`;
@@ -56,7 +61,9 @@ export async function apiClient<T = unknown>(
     // Handle 401 - token expired/invalid
     if (response.status === 401 && !isPublic) {
       clearToken();
-      window.location.href = "/login";
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
       return { data: null, error: "Session expired. Please login again.", status: 401 };
     }
 

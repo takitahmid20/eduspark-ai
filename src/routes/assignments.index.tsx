@@ -6,7 +6,7 @@ import {
   Plus, Search, Pencil, Trash2, Loader2, ClipboardList,
   X, Check, AlertTriangle, BookOpen, Hash, Upload,
 } from "lucide-react";
-import { createAssignment, getAssignment, updateAssignment, deleteAssignment } from "@/lib/api";
+import { getAssignments, createAssignment, updateAssignment, deleteAssignment } from "@/lib/api";
 import type { Assignment } from "@/lib/api";
 import { CardGridSkeleton } from "@/components/app/skeleton";
 
@@ -14,19 +14,6 @@ export const Route = createFileRoute("/assignments/")({
   head: () => ({ meta: [{ title: "Assignments — TAAI" }] }),
   component: AssignmentsPage,
 });
-
-const STORAGE_KEY = "taai_assignment_ids";
-
-function getStoredIds(): number[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function storeIds(ids: number[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-}
 
 function AssignmentsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -37,22 +24,20 @@ function AssignmentsPage() {
   const [createForm, setCreateForm] = useState({ title: "", subject: "", total_marks: "" });
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ title: "", subject: "", topic: "", total_marks: "" });
   const [editLoading, setEditLoading] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchAssignments = useCallback(async () => {
     setLoading(true);
-    const ids = getStoredIds();
-    if (ids.length === 0) { setAssignments([]); setLoading(false); return; }
-    const results = await Promise.all(ids.map((id) => getAssignment(id)));
-    const valid: Assignment[] = [];
-    const validIds: number[] = [];
-    results.forEach((result, i) => { if (result.data) { valid.push(result.data); validIds.push(ids[i]); } });
-    storeIds(validIds);
-    setAssignments(valid);
+    const result = await getAssignments();
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
+      setAssignments(result.data.data);
+    }
     setLoading(false);
   }, []);
 
@@ -74,15 +59,14 @@ function AssignmentsPage() {
     const result = await createAssignment({ title: createForm.title.trim(), subject: createForm.subject.trim(), total_marks: Number(createForm.total_marks) });
     setCreateLoading(false);
     if (result.error) { setCreateError(result.error); return; }
-    if (result.data) { const ids = getStoredIds(); ids.unshift(result.data.assignment_id); storeIds(ids); }
     setCreateForm({ title: "", subject: "", total_marks: "" });
     setShowCreate(false);
     fetchAssignments();
   }
 
   function startEdit(a: Assignment) {
-    const id = a.assignment_id || a.id;
-    if (!id) return;
+    const id = getId(a);
+    if (!id || id === "0") return;
     setEditingId(id);
     setEditForm({ title: a.title, subject: a.subject, topic: a.topic || "", total_marks: String(a.total_marks) });
   }
@@ -90,24 +74,30 @@ function AssignmentsPage() {
   async function handleEdit() {
     if (!editingId || !editForm.title.trim() || !editForm.subject.trim()) return;
     setEditLoading(true);
-    const result = await updateAssignment(editingId, { title: editForm.title.trim(), subject: editForm.subject.trim(), topic: editForm.topic.trim() || undefined, total_marks: Number(editForm.total_marks) || undefined });
+    const result = await updateAssignment(Number(editingId), { title: editForm.title.trim(), subject: editForm.subject.trim(), topic: editForm.topic.trim() || undefined, total_marks: Number(editForm.total_marks) || undefined });
     setEditLoading(false);
     if (result.error) { setError(result.error); return; }
     setEditingId(null);
     fetchAssignments();
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     setDeleteLoading(true);
-    const result = await deleteAssignment(id);
+    const result = await deleteAssignment(Number(id));
     setDeleteLoading(false);
-    if (result.error) { setError(result.error); setDeletingId(null); return; }
-    storeIds(getStoredIds().filter((i) => i !== id));
+    if (result.error) {
+      const friendly = result.error.includes("foreign key") || result.error.includes("constraint") || result.error.includes("Database error while deleting")
+        ? "Cannot delete this assignment because it has questions, rubrics, or solutions attached. Please delete them first."
+        : result.error;
+      setError(friendly);
+      setDeletingId(null);
+      return;
+    }
     setDeletingId(null);
     fetchAssignments();
   }
 
-  function getId(a: Assignment): number { return a.assignment_id || a.id || 0; }
+  function getId(a: Assignment): string { return String(a.assignment_id || a.id || 0); }
 
   return (
     <AppShell title="Assignments" subtitle="Create and manage your assessments">
