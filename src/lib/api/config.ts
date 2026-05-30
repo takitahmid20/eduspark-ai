@@ -47,7 +47,7 @@ export const ENDPOINTS = {
   STUDENT_ANSWER_UPDATE: (answerId: number) => `/student-answers/${answerId}`,
 
   // Student Assignment Marks
-  STUDENT_ASSIGNMENTS: (studentId: string) => `/students/${studentId}/assignments`,
+  STUDENT_ASSIGNMENTS: (studentId: string) => `/students/${studentId}/assignment-grades`,
 
   // Grading
   GRADE_STUDENT: (assignmentId: number, studentId: string) =>
