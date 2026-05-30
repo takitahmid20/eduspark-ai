@@ -1,12 +1,9 @@
 /**
  * API Configuration
  * Uses VITE_API_BASE_URL from environment variables.
- * - Development: https://5zcs6sz7-8080.asse.devtunnels.ms
- * - Production: Set in .env.production
  */
 
-// export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://5zcs6sz7-8080.asse.devtunnels.ms";
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://jdw0nbdh-8080.inc1.devtunnels.ms";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://5zcs6sz7-8080.asse.devtunnels.ms";
 
 export const ENDPOINTS = {
   // Auth
