@@ -216,7 +216,7 @@ function AssignmentDetail() {
       setLoadingResults(true);
       const results = await Promise.all(
         students.map(async (s) => {
-          const res = await getStudentScores(id, s.student_id);
+          const res = await getStudentScores(id, s.id);
           return {
             studentId: s.student_id,
             name: s.name,
@@ -918,7 +918,7 @@ function AssignmentDetail() {
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Select Student</label>
                 <SearchableSelect
-                  options={students.map((s) => ({ value: s.student_id, label: s.name, sub: s.student_id }))}
+                  options={students.map((s) => ({ value: s.id, label: s.name, sub: s.student_id }))}
                   value={selectedStudentId}
                   onChange={(v) => { setSelectedStudentId(v); setStudentAnswers([]); setAnswerUploadSuccess(null); setAnswerUploadError(null); }}
                   placeholder="Choose a student..."
@@ -1020,7 +1020,7 @@ function AssignmentDetail() {
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Select Student</label>
               <SearchableSelect
-                options={students.map((s) => ({ value: s.student_id, label: s.name, sub: s.student_id }))}
+                options={students.map((s) => ({ value: s.id, label: s.name, sub: s.student_id }))}
                 value={selectedStudentId}
                 onChange={(v) => { setSelectedStudentId(v); setScores([]); setTotalMarksObtained(0); setGradingSuccess(null); setGradingError(null); }}
                 placeholder="Choose a student..."

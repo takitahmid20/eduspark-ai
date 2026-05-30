@@ -27,8 +27,8 @@ function StudentDetail() {
         setError(result.error);
       } else if (result.data) {
         setStudent(result.data.data);
-        // getStudentAssignments uses student_id (human-readable)
-        const marksResult = await getStudentAssignments(result.data.data.student_id);
+        // getStudentAssignments uses UUID (id)
+        const marksResult = await getStudentAssignments(result.data.data.id);
         if (marksResult.data) {
           setAssignments(marksResult.data.data);
         }
