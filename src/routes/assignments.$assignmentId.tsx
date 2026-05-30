@@ -21,6 +21,7 @@ import { sortByQuestionLabel } from "@/lib/sort-questions";
 import { normalizeRubricDescription } from "@/lib/normalize-rubric";
 import { SearchableSelect } from "@/components/app/searchable-select";
 import { MathText } from "@/components/app/math-text";
+import { FilePreviewButton } from "@/components/app/file-preview";
 
 export const Route = createFileRoute("/assignments/$assignmentId")({
   head: () => ({ meta: [{ title: "Assignment — TAAI" }] }),
@@ -593,6 +594,7 @@ function AssignmentDetail() {
                       <div className="text-sm font-medium truncate">{file.name}</div>
                       <div className="text-xs text-muted-foreground">{(file.size / 1024 / 1024).toFixed(1)} MB</div>
                     </div>
+                    <FilePreviewButton file={file} />
                     <button onClick={() => removeFile(i)} className="size-7 rounded-lg hover:bg-accent grid place-items-center cursor-pointer"><X className="size-3.5 text-muted-foreground" /></button>
                   </div>
                 ))}
@@ -951,6 +953,7 @@ function AssignmentDetail() {
                           <FileText className="size-3.5 text-muted-foreground shrink-0" />
                           <span className="flex-1 truncate">{f.name}</span>
                           <span className="text-muted-foreground shrink-0">{(f.size / 1024 / 1024).toFixed(1)} MB</span>
+                          <FilePreviewButton file={f} />
                           <button onClick={() => setAnswerFiles(answerFiles.filter((_, j) => j !== i))} className="cursor-pointer"><X className="size-3 text-muted-foreground" /></button>
                         </div>
                       ))}
