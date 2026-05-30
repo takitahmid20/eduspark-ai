@@ -72,14 +72,32 @@ export function MarkdownRender({ content, className = "" }: { content: string; c
 }
 
 function preprocessMath(text: string): string {
-  // Replace $$...$$ with code blocks that we'll render as math
-  let result = text.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
+  if (!text) return "";
+
+  let result = text;
+
+  // 1. Replace block math: \[ ... \] or \\[ ... \\]
+  result = result.replace(/(?:\\\[|\\\\\[)([\s\S]*?)(?:\\\]|\\\\\])/g, (_, math) => {
     return `\`MATH_DISPLAY:${math.trim()}\``;
   });
 
-  // Replace $...$ with inline code that we'll render as math
-  // Be careful not to match currency like $5
+  // Replace $$...$$ with code blocks that we'll render as math
+  result = result.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
+    return `\`MATH_DISPLAY:${math.trim()}\``;
+  });
+
+  // 2. Replace inline math: \( ... \) or \\( ... \\)
+  result = result.replace(/(?:\\\(|\\\\\()([\s\S]*?)(?:\\\)|\\\\\))/g, (_, math) => {
+    return `\`MATH_INLINE:${math.trim()}\``;
+  });
+
+  // Replace $...$ with inline code that we'll render as math (avoiding currency like $5)
   result = result.replace(/(?<!\$)\$(?!\$)([^$\n]+?)\$/g, (_, math) => {
+    return `\`MATH_INLINE:${math.trim()}\``;
+  });
+
+  // 3. Fallback: Parse literal "( ... )" where the content inside has LaTeX commands starting with a backslash
+  result = result.replace(/(?<!\\)\(([^)\n]*\\[a-zA-Z]+[^)\n]*)\)/g, (_, math) => {
     return `\`MATH_INLINE:${math.trim()}\``;
   });
 
