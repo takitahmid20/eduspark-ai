@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 
@@ -13,6 +14,7 @@ export function MarkdownRender({ content, className = "" }: { content: string; c
   return (
     <div className={`markdown-content ${className}`}>
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => <h1 className="text-lg font-bold mt-4 mb-2">{children}</h1>,
           h2: ({ children }) => <h2 className="text-base font-bold mt-4 mb-2">{children}</h2>,
@@ -44,9 +46,23 @@ export function MarkdownRender({ content, className = "" }: { content: string; c
           blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/30 pl-3 my-2 text-muted-foreground italic">{children}</blockquote>,
           hr: () => <hr className="my-3 border-border" />,
           a: ({ href, children }) => <a href={href} className="text-primary underline" target="_blank" rel="noopener noreferrer">{children}</a>,
-          table: ({ children }) => <div className="my-2 overflow-x-auto"><table className="w-full text-xs border border-border rounded">{children}</table></div>,
-          th: ({ children }) => <th className="px-2 py-1.5 bg-muted/50 border-b border-border text-left font-medium">{children}</th>,
-          td: ({ children }) => <td className="px-2 py-1.5 border-b border-border">{children}</td>,
+          table: ({ children }) => (
+            <div className="my-3 overflow-x-auto rounded-lg border border-border">
+              <table className="w-full text-xs border-collapse">{children}</table>
+            </div>
+          ),
+          thead: ({ children }) => (
+            <thead className="bg-muted/50 border-b border-border">{children}</thead>
+          ),
+          tr: ({ children }) => (
+            <tr className="hover:bg-muted/30 transition-colors last:border-b-0">{children}</tr>
+          ),
+          th: ({ children }) => (
+            <th className="px-3 py-2 text-left font-semibold text-muted-foreground align-middle">{children}</th>
+          ),
+          td: ({ children }) => (
+            <td className="px-3 py-2 border-b border-border align-middle last:border-b-0">{children}</td>
+          ),
         }}
       >
         {processed}
