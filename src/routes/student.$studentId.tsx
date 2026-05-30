@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/app/shell";
-import { ArrowLeft, Loader2, User, Hash, Calendar, Shield } from "lucide-react";
-import { getStudent } from "@/lib/api";
-import type { Student } from "@/lib/api";
+import { ArrowLeft, Loader2, User, Hash, Calendar, Shield, ClipboardList } from "lucide-react";
+import { getStudent, getStudentAssignments } from "@/lib/api";
+import type { Student, StudentAssignmentMark } from "@/lib/api";
 import { DetailSkeleton } from "@/components/app/skeleton";
 
 export const Route = createFileRoute("/student/$studentId")({
@@ -14,18 +14,26 @@ export const Route = createFileRoute("/student/$studentId")({
 function StudentDetail() {
   const { studentId } = Route.useParams();
   const [student, setStudent] = useState<Student | null>(null);
+  const [assignments, setAssignments] = useState<StudentAssignmentMark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
+      // getStudent uses UUID (id)
       const result = await getStudent(studentId);
       if (result.error) {
         setError(result.error);
       } else if (result.data) {
         setStudent(result.data.data);
+        // getStudentAssignments uses student_id (human-readable)
+        const marksResult = await getStudentAssignments(result.data.data.student_id);
+        if (marksResult.data) {
+          setAssignments(marksResult.data.data);
+        }
       }
+
       setLoading(false);
     }
     load();
@@ -133,6 +141,51 @@ function StudentDetail() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Assignment Marks */}
+          <div className="mt-6 rounded-md border border-border bg-card">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
+              <ClipboardList className="size-4 text-muted-foreground" />
+              <h3 className="font-bold text-sm">Assignment Marks</h3>
+              {assignments.length > 0 && <span className="text-xs text-muted-foreground ml-auto">{assignments.length} assignments</span>}
+            </div>
+
+            {assignments.length === 0 ? (
+              <div className="px-5 py-8 text-center text-sm text-muted-foreground">No graded assignments yet.</div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Assignment</th>
+                    <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Subject</th>
+                    <th className="text-right px-5 py-2.5 font-medium text-muted-foreground">Score</th>
+                    <th className="text-right px-5 py-2.5 font-medium text-muted-foreground">Questions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {assignments.map((a) => (
+                    <tr key={a.assignment_id} className="hover:bg-accent/50 transition">
+                      <td className="px-5 py-3">
+                        <Link
+                          to="/assignments/$assignmentId"
+                          params={{ assignmentId: String(a.assignment_id) }}
+                          className="font-medium text-primary hover:underline cursor-pointer"
+                        >
+                          {a.title}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">{a.subject}</td>
+                      <td className="px-5 py-3 text-right">
+                        <span className="font-bold">{a.marks_obtained}</span>
+                        <span className="text-muted-foreground"> / {a.assignment_total_marks}</span>
+                      </td>
+                      <td className="px-5 py-3 text-right text-muted-foreground">{a.graded_question_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

@@ -49,6 +49,9 @@ export const ENDPOINTS = {
     `/assignments/${assignmentId}/students/${studentId}/answers`,
   STUDENT_ANSWER_UPDATE: (answerId: number) => `/student-answers/${answerId}`,
 
+  // Student Assignment Marks
+  STUDENT_ASSIGNMENTS: (studentId: string) => `/students/${studentId}/assignments`,
+
   // Grading
   GRADE_STUDENT: (assignmentId: number, studentId: string) =>
     `/assignments/${assignmentId}/students/${studentId}/grade`,
@@ -56,9 +59,13 @@ export const ENDPOINTS = {
     `/assignments/${assignmentId}/students/${studentId}/scores`,
 
   // Syllabus GraphRAG
-  SYLLABUS_UPLOAD: "/syllabus/upload",
-  SYLLABUS_GRAPH: (syllabusId: number) => `/syllabus/${syllabusId}/graph`,
+  SYLLABUS_UPLOAD: (assignmentId: number) => `/assignments/${assignmentId}/syllabus/upload`,
+  SYLLABUS_STATUS: (syllabusId: number) => `/syllabus/${syllabusId}/status`,
+  SYLLABUS_GRAPH: (assignmentId: number, syllabusId: number) => `/assignments/${assignmentId}/syllabus/${syllabusId}/graph`,
   SYLLABUS_QUERY: "/syllabus/query",
   SYLLABUS_PREREQUISITES: (syllabusId: number, topic: string) =>
     `/syllabus/${syllabusId}/prerequisites/${encodeURIComponent(topic)}`,
+
+  // TA Chat
+  TA_CHAT: "/ta/chat",
 } as const;

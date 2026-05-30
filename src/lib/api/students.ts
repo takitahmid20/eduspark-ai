@@ -4,7 +4,8 @@ import { ENDPOINTS } from "./config";
 // Types
 export type Student = {
   teacher_id: string;
-  student_id: string;
+  id: string;          // UUID (internal)
+  student_id: string;  // Human-readable student ID — used in API path params
   name: string;
   created_at: string;
 };
@@ -57,4 +58,25 @@ export async function deleteStudent(studentId: string) {
   return apiClient<StudentResponse>(ENDPOINTS.STUDENT(studentId), {
     method: "DELETE",
   });
+}
+
+// Student assignment marks
+export type StudentAssignmentMark = {
+  assignment_id: number;
+  title: string;
+  subject: string;
+  assignment_total_marks: number;
+  marks_obtained: number;
+  graded_question_count: number;
+  created_at: string;
+};
+
+type StudentAssignmentsResponse = {
+  message: string;
+  student: Student;
+  data: StudentAssignmentMark[];
+};
+
+export async function getStudentAssignments(studentId: string) {
+  return apiClient<StudentAssignmentsResponse>(ENDPOINTS.STUDENT_ASSIGNMENTS(studentId));
 }

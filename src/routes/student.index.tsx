@@ -64,7 +64,7 @@ function StudentsPage() {
   const filtered = students.filter(
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.id.toLowerCase().includes(search.toLowerCase())
+      s.student_id.toLowerCase().includes(search.toLowerCase())
   );
 
   // Add student
@@ -375,7 +375,7 @@ function StudentsPage() {
                     <>
                       <Link
                         to="/student/$studentId"
-                        params={{ studentId: student.student_id }}
+                        params={{ studentId: student.id }}
                         className="size-8 rounded-lg hover:bg-primary/10 grid place-items-center transition cursor-pointer"
                         title="Details"
                       >

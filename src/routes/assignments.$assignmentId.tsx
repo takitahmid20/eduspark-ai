@@ -13,6 +13,7 @@ import {
   uploadSolutions, getSolutions, updateSolution, deleteSolution,
   getStudents, uploadStudentAnswers, getStudentAnswers, updateStudentAnswer,
   gradeStudent, getStudentScores,
+  uploadSyllabus, getSyllabusStatus,
 } from "@/lib/api";
 import type { Assignment, Question, Rubric, RubricDescription, Solution, Student, StudentAnswer, ScoreEntry } from "@/lib/api";
 import { DetailSkeleton } from "@/components/app/skeleton";
@@ -103,6 +104,28 @@ function AssignmentDetail() {
   const [loadingResults, setLoadingResults] = useState(false);
   const [resultsSearch, setResultsSearch] = useState("");
   const [resultsFilter, setResultsFilter] = useState<string>("all");
+
+  // Syllabus state
+  const syllabusStorageKey = `taai_syllabus_${id}`;
+  const [syllabusId, setSyllabusId] = useState<number | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = localStorage.getItem(syllabusStorageKey);
+    return stored ? Number(stored) : null;
+  });
+  const [syllabusStatus, setSyllabusStatus] = useState<string | null>(null);
+  const [uploadingSyllabus, setUploadingSyllabus] = useState(false);
+  const [syllabusError, setSyllabusError] = useState<string | null>(null);
+  const syllabusFileRef = useRef<HTMLInputElement>(null);
+
+  // Check syllabus status on load if we have an ID
+  useEffect(() => {
+    if (!syllabusId) return;
+    async function checkStatus() {
+      const res = await getSyllabusStatus(syllabusId!);
+      if (res.data) setSyllabusStatus(res.data.data.status);
+    }
+    checkStatus();
+  }, [syllabusId]);
 
   // Fetch assignment
   useEffect(() => {
@@ -353,6 +376,39 @@ function AssignmentDetail() {
     fetchScores();
   }
 
+  // Syllabus upload
+  async function handleSyllabusUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSyllabusError(null);
+    setUploadingSyllabus(true);
+
+    const result = await uploadSyllabus(file, id);
+    setUploadingSyllabus(false);
+    if (result.error) { setSyllabusError(result.error); return; }
+    if (result.data) {
+      const newId = result.data.data.syllabus_id;
+      setSyllabusId(newId);
+      setSyllabusStatus(result.data.data.status);
+      localStorage.setItem(syllabusStorageKey, String(newId));
+      if (result.data.data.status === "processing") {
+        pollSyllabusStatus(newId);
+      }
+    }
+  }
+
+  async function pollSyllabusStatus(sId: number) {
+    const interval = setInterval(async () => {
+      const res = await getSyllabusStatus(sId);
+      if (res.data) {
+        setSyllabusStatus(res.data.data.status);
+        if (res.data.data.status !== "processing") {
+          clearInterval(interval);
+        }
+      }
+    }, 3000);
+  }
+
   function getFileIcon(file: File) {
     if (file.type.startsWith("image/")) return <ImageIcon className="size-4" />;
     return <FileText className="size-4" />;
@@ -372,10 +428,40 @@ function AssignmentDetail() {
       subtitle={assignment ? `${assignment.subject} · ${assignment.total_marks} marks` : undefined}
     >
       <div className="w-full">
-        {/* Back */}
-        <Link to="/assignments" className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition cursor-pointer mb-6">
-          <ArrowLeft className="size-4" /> Back to Assignments
-        </Link>
+        {/* Top row: Back + Syllabus upload */}
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/assignments" className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition cursor-pointer">
+            <ArrowLeft className="size-4" /> Back to Assignments
+          </Link>
+
+          <div className="flex items-center gap-3">
+            {syllabusStatus && (
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${syllabusStatus === "completed" ? "bg-success/10 text-success" : syllabusStatus === "processing" ? "bg-warning/10 text-warning" : "bg-muted text-muted-foreground"}`}>
+                Course Outline: {syllabusStatus}
+              </span>
+            )}
+            {syllabusStatus === "completed" && syllabusId && (
+              <Link
+                to="/graph/$assignmentId"
+                params={{ assignmentId: String(id) }}
+                search={{ syllabusId: syllabusId }}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-primary/30 text-xs font-medium text-primary hover:bg-primary/5 transition cursor-pointer"
+              >
+                <BarChart3 className="size-3.5" /> View Knowledge Graph
+              </Link>
+            )}
+            {syllabusError && <span className="text-xs text-destructive">{syllabusError}</span>}
+            <input ref={syllabusFileRef} type="file" accept=".pdf,.docx,.txt" onChange={handleSyllabusUpload} className="hidden" />
+            <button
+              onClick={() => syllabusFileRef.current?.click()}
+              disabled={uploadingSyllabus}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border text-xs font-medium hover:bg-accent transition cursor-pointer disabled:opacity-60"
+            >
+              {uploadingSyllabus ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+              {syllabusId ? "Re-upload" : "Upload Course Outline"}
+            </button>
+          </div>
+        </div>
 
         {/* Assignment details card */}
         {assignment && (
@@ -412,44 +498,57 @@ function AssignmentDetail() {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-md bg-muted/50 border border-border w-fit mb-6">
-          <button
-            onClick={() => { switchTab("questions"); setFiles([]); setUploadError(null); setUploadSuccess(null); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === "questions" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"}`}
-          >
-            Questions
-          </button>
-          <button
-            onClick={() => { switchTab("rubrics"); setFiles([]); setUploadError(null); setUploadSuccess(null); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === "rubrics" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"}`}
-          >
-            Rubrics
-          </button>
-          <button
-            onClick={() => { switchTab("solutions"); setFiles([]); setUploadError(null); setUploadSuccess(null); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === "solutions" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"}`}
-          >
-            Solutions
-          </button>
-          <button
-            onClick={() => { switchTab("answers"); setAnswerUploadError(null); setAnswerUploadSuccess(null); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === "answers" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"}`}
-          >
-            Student Answers
-          </button>
-          <button
-            onClick={() => { switchTab("grading"); setGradingError(null); setGradingSuccess(null); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === "grading" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"}`}
-          >
-            Grading
-          </button>
-          <button
-            onClick={() => { switchTab("results"); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${activeTab === "results" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"}`}
-          >
-            Results
-          </button>
+        {/* Two-group tab system */}
+        <div className="flex flex-wrap items-start gap-6 mb-6">
+          {/* Group 1: Assignment Setup */}
+          <div>
+            <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Assignment Setup</div>
+            <div className="flex items-center gap-1 p-1 rounded-md bg-muted/50 border border-border">
+              <button
+                onClick={() => { switchTab("questions"); setFiles([]); setUploadError(null); setUploadSuccess(null); }}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer ${activeTab === "questions" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Questions
+              </button>
+              <button
+                onClick={() => { switchTab("rubrics"); setFiles([]); setUploadError(null); setUploadSuccess(null); }}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer ${activeTab === "rubrics" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Rubrics
+              </button>
+              <button
+                onClick={() => { switchTab("solutions"); setFiles([]); setUploadError(null); setUploadSuccess(null); }}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer ${activeTab === "solutions" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Solutions
+              </button>
+            </div>
+          </div>
+
+          {/* Group 2: Student Evaluation */}
+          <div>
+            <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Student Evaluation</div>
+            <div className="flex items-center gap-1 p-1 rounded-md bg-muted/50 border border-border">
+              <button
+                onClick={() => { switchTab("answers"); setAnswerUploadError(null); setAnswerUploadSuccess(null); }}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer ${activeTab === "answers" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Student Answers
+              </button>
+              <button
+                onClick={() => { switchTab("grading"); setGradingError(null); setGradingSuccess(null); }}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer ${activeTab === "grading" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Grading
+              </button>
+              <button
+                onClick={() => { switchTab("results"); }}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer ${activeTab === "results" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Results
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Two-column layout for Questions/Rubrics/Solutions — content first, upload compact */}

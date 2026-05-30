@@ -27,6 +27,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as AssignmentsIndexRouteImport } from './routes/assignments.index'
 import { Route as StudentStudentIdRouteImport } from './routes/student.$studentId'
+import { Route as GraphAssignmentIdRouteImport } from './routes/graph.$assignmentId'
 import { Route as AssignmentsAssignmentIdRouteImport } from './routes/assignments.$assignmentId'
 
 const UploadRoute = UploadRouteImport.update({
@@ -119,6 +120,11 @@ const StudentStudentIdRoute = StudentStudentIdRouteImport.update({
   path: '/$studentId',
   getParentRoute: () => StudentRoute,
 } as any)
+const GraphAssignmentIdRoute = GraphAssignmentIdRouteImport.update({
+  id: '/graph/$assignmentId',
+  path: '/graph/$assignmentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssignmentsAssignmentIdRoute = AssignmentsAssignmentIdRouteImport.update({
   id: '/$assignmentId',
   path: '/$assignmentId',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/student': typeof StudentRouteWithChildren
   '/upload': typeof UploadRoute
   '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
+  '/graph/$assignmentId': typeof GraphAssignmentIdRoute
   '/student/$studentId': typeof StudentStudentIdRoute
   '/assignments/': typeof AssignmentsIndexRoute
   '/student/': typeof StudentIndexRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/upload': typeof UploadRoute
   '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
+  '/graph/$assignmentId': typeof GraphAssignmentIdRoute
   '/student/$studentId': typeof StudentStudentIdRoute
   '/assignments': typeof AssignmentsIndexRoute
   '/student': typeof StudentIndexRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/student': typeof StudentRouteWithChildren
   '/upload': typeof UploadRoute
   '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
+  '/graph/$assignmentId': typeof GraphAssignmentIdRoute
   '/student/$studentId': typeof StudentStudentIdRoute
   '/assignments/': typeof AssignmentsIndexRoute
   '/student/': typeof StudentIndexRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/upload'
     | '/assignments/$assignmentId'
+    | '/graph/$assignmentId'
     | '/student/$studentId'
     | '/assignments/'
     | '/student/'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/upload'
     | '/assignments/$assignmentId'
+    | '/graph/$assignmentId'
     | '/student/$studentId'
     | '/assignments'
     | '/student'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/upload'
     | '/assignments/$assignmentId'
+    | '/graph/$assignmentId'
     | '/student/$studentId'
     | '/assignments/'
     | '/student/'
@@ -267,6 +279,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StudentRoute: typeof StudentRouteWithChildren
   UploadRoute: typeof UploadRoute
+  GraphAssignmentIdRoute: typeof GraphAssignmentIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -397,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentStudentIdRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/graph/$assignmentId': {
+      id: '/graph/$assignmentId'
+      path: '/graph/$assignmentId'
+      fullPath: '/graph/$assignmentId'
+      preLoaderRoute: typeof GraphAssignmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assignments/$assignmentId': {
       id: '/assignments/$assignmentId'
       path: '/$assignmentId'
@@ -450,6 +470,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StudentRoute: StudentRouteWithChildren,
   UploadRoute: UploadRoute,
+  GraphAssignmentIdRoute: GraphAssignmentIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

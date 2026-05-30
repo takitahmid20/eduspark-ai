@@ -70,19 +70,26 @@ type PrerequisitesResponse = {
 // API calls
 
 /** Upload a syllabus document for GraphRAG processing */
-export async function uploadSyllabus(file: File) {
+export async function uploadSyllabus(file: File, assignmentId: number) {
   const formData = new FormData();
   formData.append("file", file);
 
-  return apiClient<SyllabusUploadResponse>(ENDPOINTS.SYLLABUS_UPLOAD, {
+  return apiClient<SyllabusUploadResponse>(ENDPOINTS.SYLLABUS_UPLOAD(assignmentId), {
     method: "POST",
     body: formData as unknown as FormData,
   });
 }
 
+/** Check syllabus processing status */
+export async function getSyllabusStatus(syllabusId: number) {
+  return apiClient<{ message: string; data: { syllabus_id: number; status: string } }>(
+    ENDPOINTS.SYLLABUS_STATUS(syllabusId)
+  );
+}
+
 /** Get the knowledge graph for a syllabus */
-export async function getSyllabusGraph(syllabusId: number) {
-  return apiClient<SyllabusGraphResponse>(ENDPOINTS.SYLLABUS_GRAPH(syllabusId));
+export async function getSyllabusGraph(assignmentId: number, syllabusId: number) {
+  return apiClient<SyllabusGraphResponse>(ENDPOINTS.SYLLABUS_GRAPH(assignmentId, syllabusId));
 }
 
 /** Query the syllabus with natural language */
